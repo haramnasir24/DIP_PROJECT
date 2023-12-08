@@ -4,7 +4,6 @@ import numpy as np
 # Read the image
 # image = cv2.imread('./pics/house.jpg')
 
-
 # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
