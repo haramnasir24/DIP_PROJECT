@@ -1,59 +1,160 @@
-import dearpygui.dearpygui as dpg
-
-dpg.create_context()
-
-
-def file_dialog_callback(sender, app_data, user_data):
-    selected_file_path = app_data["file_path_name"]
-    if selected_file_path:
-        show_image_window(selected_file_path)
-
-# Load the image and get its dimensions
+import streamlit as st
+from PIL import Image
+import numpy as np
+import cv2
+import functions
 
 
-def show_image_window(image_path):
-
-    width, height, channels, data = dpg.load_image(image_path)
-    with dpg.window(label="Image Display", width=width, height=height, id="ImageDisplay", no_move=True, no_resize=True):
-        with dpg.texture_registry(show=False):
-            dpg.add_static_texture(
-                width=width, height=height, default_value=data, tag="texture_tag")
-
-        # Add an image widget to display the selected image
-        dpg.add_image("texture_tag")
-        
-        # Adjust the position of the Image Display window
-        dpg.set_item_pos("ImageDisplay", [400, 100])  # Adjust the coordinates as needed
+def custom_title():
+    st.markdown("""
+        <h2 style='text-align: center; color: darkgreen; margin-top: 0px'>PHOTO EDITOR/PREPROCESSOR</h2>
+    """, unsafe_allow_html=True)
 
 
-# to select a file
-with dpg.file_dialog(directory_selector=False, show=False, callback=file_dialog_callback, id="file_dialog_id", width=700, height=400):
-    dpg.add_file_extension(".png")
-    dpg.add_file_extension(".jpg")
-    dpg.add_file_extension(".jpeg")
+def main():
+    # st.title("PHOTO EDITOR/PREPROCESSOR")
+    custom_title()
 
-with dpg.window(label="Menu", width=250, height=800, id="Menu", no_move=True, no_resize=True):
-    dpg.add_button(label="Open Image",
-                callback=lambda: dpg.show_item("file_dialog_id"))
+    with st.sidebar:
 
-    with dpg.menu_bar():
-        with dpg.menu(label="File"):
-            dpg.add_menu_item(label="Save")
-            dpg.add_menu_item(label="Save As")
+        # Allow the user to upload an image
+        uploaded_image = st.file_uploader("Choose an image...", type=[
+                                          "jpg", "jpeg", "png", "tiff"])
 
-        with dpg.menu(label="Settings"):
-            dpg.add_menu_item(label="Setting 1")
-            dpg.add_menu_item(label="Setting 2")
+        # image = cv2.imread(uploaded_image)
 
-        dpg.add_menu_item(label="Help")
+    if uploaded_image is not None:
+        # Display the uploaded image
+        image = Image.open(uploaded_image)
 
-        with dpg.menu(label="Widgets"):
-            dpg.add_checkbox(label="Pick Me")
-            dpg.add_button(label="Press Me")
-            dpg.add_color_picker(label="Color Me")
+        container = st.image(
+            image, caption="Uploaded Image", use_column_width=False)
 
-dpg.create_viewport(title='Image Editor', width=800, height=600)
-dpg.setup_dearpygui()
-dpg.show_viewport()
-dpg.start_dearpygui()
-dpg.destroy_context()
+    with st.sidebar:
+
+        st.header("Functions:")
+
+        st.text("To Resize:")
+        with st.form("resize_form"):
+            width_input = st.number_input(
+                "Enter the desired width:", value=0, step=1)
+            height_input = st.number_input(
+                "Enter the desired height:", value=0, step=1)
+
+            # Add a submit button to the form
+            submitted = st.form_submit_button("Resize")
+
+            # Check if the form is submitted and both values are provided
+            if submitted and width_input != 0 and height_input != 0:
+                st.write(
+                    f"Resizing to width: {width_input}, height: {height_input}")
+
+                resized_image = functions.resize_image(
+                    image, width_input, height_input)
+
+                if resized_image is not None:
+                    # Display the uploaded image
+                    container.image(
+                        resized_image, caption="Resized Image", use_column_width=False)
+
+            elif submitted:
+                st.warning(
+                    "Please enter both width and height before resizing.")
+
+        st.text("To Rotate:")
+
+        with st.form("rotate_form"):
+
+            angle = st.number_input(
+                "Enter the desired angle:", value=0, step=1)
+
+            uncropped_rotate = st.form_submit_button("Rotate but NOT Crop")
+            cropped_rotate = st.form_submit_button("Rotate AND Crop")
+
+            if (uncropped_rotate):
+
+                uncropped_rotated_image = functions.rotate_not_cropped(
+                    image, angle)
+
+                if uncropped_rotated_image is not None:
+                    # Display the uploaded image
+                    container.image(
+                        uncropped_rotated_image, caption="Rotated Image", use_column_width=False)
+
+            if (cropped_rotate):
+
+                cropped_rotated_image = functions.rotate_cropped(image, angle)
+
+                if cropped_rotated_image is not None:
+                    # Display the uploaded image
+                    container.image(
+                        cropped_rotated_image, caption="Rotated Image", use_column_width=False)
+
+        st.text("Flip the image:")
+        horizontal_flip = st.button("Horizontal Flip")
+
+        if (horizontal_flip):
+
+            horizontal_flipped_image = functions.horizontal_flip(image)
+
+            if horizontal_flipped_image is not None:
+                # Display the uploaded image
+                container.image(horizontal_flipped_image,
+                                caption="Rotated Image", use_column_width=False)
+
+        Vertical_flip = st.button("Vertical Flip")
+
+        if (Vertical_flip):
+
+            vertical_flipped_image = functions.vertical_flip(image)
+
+            if vertical_flipped_image is not None:
+                # Display the uploaded image
+                container.image(vertical_flipped_image,
+                                caption="Rotated Image", use_column_width=False)
+
+        # Add a slider
+        contrast_input = st.slider("Change Contrast:", min_value=0,
+                                   max_value=255, value=125, step=1, key='contrast_slider')
+
+        # Check if the slider value has changed
+        if st.button("Apply Contrast"):
+
+            contrast_image = functions.linearContrastStretch(
+                image, contrast_input)
+
+            if contrast_image is not None:
+                # Display the uploaded image
+                container.image(
+                    contrast_image, caption="Rotated Image", use_column_width=False)
+
+        brightness_input = st.slider(
+            "Change Brightness:", min_value=-255, max_value=255, value=0, step=1, key='brightness_slider')
+
+        # Check if the slider value has changed
+        if st.button("Apply Brightness"):
+
+            bright_image = functions.image_brightness(image, brightness_input)
+
+            if bright_image is not None:
+                # Display the uploaded image
+                container.image(
+                    bright_image, caption="Rotated Image", use_column_width=False)
+
+        quantisation_input = st.slider(
+            "Quantise the image:", min_value=2, max_value=256, value=16, step=1, key='quantisation_slider')
+
+        # Check if the slider value has changed
+        if st.button("Apply Quantisation"):
+
+            quantised_image = functions.quantize_image(
+                image, quantisation_input)
+
+            if quantised_image is not None:
+                # Display the uploaded image
+                container.image(
+                    quantised_image, caption="Quantised Image", use_column_width=False)
+
+
+if __name__ == "__main__":
+    main()
