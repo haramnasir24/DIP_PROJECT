@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import cv2
 import functions
+import quantisation
 
 
 def custom_title():
@@ -21,14 +22,18 @@ def main():
         uploaded_image = st.file_uploader("Choose an image...", type=[
                                           "jpg", "jpeg", "png", "tiff"])
 
-        # image = cv2.imread(uploaded_image)
-
     if uploaded_image is not None:
         # Display the uploaded image
         image = Image.open(uploaded_image)
 
         container = st.image(
             image, caption="Uploaded Image", use_column_width=False)
+
+        # Get the size of the original image
+        original_size = image.size
+        st.write(
+            f"Original Image Size: {original_size[0]} x {original_size[1]} pixels")
+
 
     with st.sidebar:
 
@@ -147,13 +152,18 @@ def main():
         # Check if the slider value has changed
         if st.button("Apply Quantisation"):
 
-            quantised_image = functions.quantize_image(
+            quantised_image = quantisation.quantize_image(
                 image, quantisation_input)
 
             if quantised_image is not None:
                 # Display the uploaded image
                 container.image(
                     quantised_image, caption="Quantised Image", use_column_width=False)
+
+            # Get the size of the quantized image
+            quantised_size = quantised_image.size
+            st.write(
+                f"Quantised Image Size: {quantised_size[0]} x {quantised_size[1]} pixels")
 
 
 if __name__ == "__main__":
