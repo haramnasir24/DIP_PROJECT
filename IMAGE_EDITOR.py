@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import cv2
 import functions
+import intensity_transform_laws
 
 def custom_title():
     st.markdown("""
@@ -28,9 +29,17 @@ def main():
         # Display the uploaded image
         image = Image.open(uploaded_image)
 
-        container = st.image(image, caption="Uploaded Image", use_column_width=False)
+        width, height = image.size
 
+        if (width > 800 or height > 500):
+
+            container = st.image(image, caption="Uploaded Image", use_column_width=True)
+        
+        else:
+             
+            container = st.image(image, caption="Uploaded Image", use_column_width=False)
     
+
     with st.sidebar:
 
         st.header("Functions:")
@@ -76,7 +85,7 @@ def main():
 
                 if uncropped_rotated_image is not None:
                     # Display the uploaded image
-                    container.image(uncropped_rotated_image, caption="Rotated Image", use_column_width=False)
+                    container.image(uncropped_rotated_image, caption="Cropped Image", use_column_width=False)
             
             if(cropped_rotate):
 
@@ -85,7 +94,7 @@ def main():
 
                 if cropped_rotated_image is not None:
                     # Display the uploaded image
-                    container.image(cropped_rotated_image, caption="Rotated Image", use_column_width=False)
+                    container.image(cropped_rotated_image, caption="Cropped Image", use_column_width=False)
 
 
         st.text("Flip the image:")
@@ -98,19 +107,19 @@ def main():
 
                 if horizontal_flipped_image is not None:
                     # Display the uploaded image
-                    container.image(horizontal_flipped_image, caption="Rotated Image", use_column_width=False)
+                    container.image(horizontal_flipped_image, caption="Flipped Image", use_column_width=False)
 
 
-        Vertical_flip = st.button("Vertical Flip")
+        vertical_flip = st.button("Vertical Flip")
 
-        if(Vertical_flip):
+        if(vertical_flip):
 
                 vertical_flipped_image = functions.vertical_flip(image)
 
 
                 if vertical_flipped_image is not None:
                     # Display the uploaded image
-                    container.image(vertical_flipped_image, caption="Rotated Image", use_column_width=False)
+                    container.image(vertical_flipped_image, caption="Flipped Image", use_column_width=False)
 
         # Add a slider
         contrast_input = st.slider("Change Contrast:", min_value=0, max_value=255, value=125, step=1, key='contrast_slider')
@@ -124,7 +133,7 @@ def main():
 
             if contrast_image is not None:
                     # Display the uploaded image
-                    container.image(contrast_image, caption="Rotated Image", use_column_width=False)
+                    container.image(contrast_image, caption="Contrast Image", use_column_width=False)
 
 
 
@@ -139,8 +148,91 @@ def main():
 
             if bright_image is not None:
                     # Display the uploaded image
-                    container.image(bright_image, caption="Rotated Image", use_column_width=False)
+                    container.image(bright_image, caption="Bright Image", use_column_width=False)
 
+
+        st.text("Noise Removal Blurs:")
+
+        with st.form("blurs_form"):
+
+            kernel_size = st.number_input("Enter the desired size of kernel:", value=0, step=1)
+            st.text("Can only be an ODD integer")
+
+            if(kernel_size % 2 == 0):
+                st.warning("Please enter an odd value for kernel size")
+
+            guass = st.form_submit_button("Guassian Blur")
+            median= st.form_submit_button("Median Blur")
+            # bilateral = st.form_submit_button("Bilateral Blur")
+
+        if(guass):
+
+                guassian_image = functions.guassian_blur(image, kernel_size)
+
+
+                if guassian_image is not None:
+                    # Display the uploaded image
+                    container.image(guassian_image, caption="Blurred Image", use_column_width=False)
+
+
+        if(median):
+
+                median_image = functions.median_blur(image, kernel_size)
+
+
+                if median_image is not None:
+                    # Display the uploaded image
+                    container.image(median_image, caption="Blurred Image", use_column_width=False)
+
+
+        # if(bilateral):
+
+        #         bilate_image = functions.bilateral_blur(image)
+
+
+        #         if bilate_image is not None:
+        #             # Display the uploaded image
+        #             container.image(bilate_image, caption="Rotated Image", use_column_width=False)
+
+        st.text("Apply Intensity Transformations:")
+        # Add a slider
+        gamma = st.number_input("Enter the Gamma value:", min_value=0.0, max_value=100.0, value=1.0, step=0.01)
+
+        # Check if the slider value has changed
+        if st.button("Apply Power Law"):
+
+            
+            power_image = intensity_transform_laws.power_law_transform(image, gamma)
+
+
+            if power_image is not None:
+                    # Display the uploaded image
+                    container.image(power_image, caption="Contrast Image", use_column_width=False)
+        
+        
+        c = st.number_input("Enter the C value:", min_value=0.0, max_value=25.0, value=1.0, step=0.01)
+
+        # Check if the slider value has changed
+        if st.button("Apply Log Law"):
+
+            
+            log_image = intensity_transform_laws.log_transform(image, c)
+
+
+            if log_image is not None:
+                    # Display the uploaded image
+                    container.image(log_image, caption="Contrast Image", use_column_width=False)
+        
+        
+        if st.button("Negative of the image"):
+
+            
+            neg_image = intensity_transform_laws.negative_of_image(image)
+
+
+            if neg_image is not None:
+                    # Display the uploaded image
+                    container.image(neg_image, caption="Contrast Image", use_column_width=False)
 
 
 
