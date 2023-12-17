@@ -10,8 +10,6 @@ def resize_image(img, w, h):
     # Resize the image
     resized_image = cv2.resize(img, (w, h))
 
-    resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
-
     resized_image = opencv_to_pil(resized_image)
 
     return resized_image
@@ -30,7 +28,6 @@ def rotate_cropped(img, angle):
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
     rotated_image = cv2.warpAffine(img, rotation_matrix, img.shape[1::-1], flags=cv2.INTER_LINEAR)
 
-    rotated_image = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2RGB)
 
     rotated_image = opencv_to_pil(rotated_image)
 
@@ -63,7 +60,6 @@ def rotate_not_cropped(img, angle):
     # Perform the rotation without cropping
     rotated_image = cv2.warpAffine(img, rotation_matrix, (new_width, new_height), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
 
-    rotated_image = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2RGB)
 
     rotated_image = opencv_to_pil(rotated_image)
 
@@ -76,7 +72,6 @@ def horizontal_flip(img):
     # Flip the image horizontally
     horizontal_flipped_image = cv2.flip(img, 1)
 
-    horizontal_flipped_image = cv2.cvtColor(horizontal_flipped_image, cv2.COLOR_BGR2RGB)
 
     horizontal_flipped_image = opencv_to_pil(horizontal_flipped_image)
 
@@ -89,7 +84,6 @@ def vertical_flip(img):
 
     vertical_flipped_image = cv2.flip(img, 0)
 
-    vertical_flipped_image = cv2.cvtColor(vertical_flipped_image, cv2.COLOR_BGR2RGB)
 
     vertical_flipped_image = opencv_to_pil(vertical_flipped_image)
 
@@ -109,8 +103,6 @@ def crop_image(img):
     height, width, _ = img.shape
     cropped_image = cv2.resize(cropped_image, (width, height))
 
-    cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
-
     cropped_image = opencv_to_pil(cropped_image)
 
     return cropped_image
@@ -128,7 +120,6 @@ def linearContrastStretch(img, Sma):
 
     contrat_stretched_image = S.astype(np.uint8)
 
-    contrat_stretched_image = cv2.cvtColor(contrat_stretched_image, cv2.COLOR_BGR2RGB)
 
     contrat_stretched_image = opencv_to_pil(contrat_stretched_image)
 
@@ -145,14 +136,48 @@ def image_brightness(img, bright):
 
     b_image = cv2.addWeighted( src1=img, alpha=contrast, src2=img, beta=0, gamma=brightness)
 
-    b_image = cv2.cvtColor(b_image, cv2.COLOR_BGR2RGB)
-
     b_image = opencv_to_pil(b_image)
 
     return b_image
 
 
+def guassian_blur(img, n):
 
+    img = pil_to_opencv(img)
+
+    guassBlurred = cv2.GaussianBlur(img, (n, n), 0)
+
+    guassBlurred = opencv_to_pil(guassBlurred)
+
+    return guassBlurred
+
+    
+
+
+# def bilateral_blur(img):
+
+#     img = pil_to_opencv(img)
+
+#     bilateBlurred = cv2.bilateralFilter(img, 9, 90, 30)
+
+#     bilateBlurred = opencv_to_pil(bilateBlurred)
+
+#     return bilateBlurred
+    
+    
+
+
+def median_blur(img, n):
+
+    img = pil_to_opencv(img)
+
+    medianBlurred = cv2.medianBlur(img, n)  # Adjust the kernel size as needed
+
+    medianBlurred = opencv_to_pil(medianBlurred)
+
+    return medianBlurred
+    
+    
 
 
 
@@ -172,6 +197,8 @@ def pil_to_opencv(img):
 
 
 def opencv_to_pil(img):
+
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     pil_image = Image.fromarray(img)
 
