@@ -26,6 +26,9 @@ def main():
         # image = cv2.imread(uploaded_image)
 
     if uploaded_image is not None:
+
+        global image
+
         # Display the uploaded image
         image = Image.open(uploaded_image)
 
@@ -59,10 +62,11 @@ def main():
 
                 resized_image = functions.resize_image(image, width_input, height_input)
 
+                image = resized_image
 
-                if resized_image is not None:
+                if image is not None:
                     # Display the uploaded image
-                    container.image(resized_image, caption="Resized Image", use_column_width=False)
+                    container.image(image, caption="Resized Image", use_column_width=False)
 
             elif submitted:
                 st.warning("Please enter both width and height before resizing.")
@@ -83,14 +87,17 @@ def main():
                 uncropped_rotated_image = functions.rotate_not_cropped(image, angle)
 
 
-                if uncropped_rotated_image is not None:
+                image = uncropped_rotated_image
+
+                if image is not None:
                     # Display the uploaded image
-                    container.image(uncropped_rotated_image, caption="Cropped Image", use_column_width=False)
+                    container.image(image, caption="Cropped Image", use_column_width=False)
             
             if(cropped_rotate):
 
                 cropped_rotated_image = functions.rotate_cropped(image, angle)
 
+                image = cropped_rotated_image
 
                 if cropped_rotated_image is not None:
                     # Display the uploaded image
@@ -104,6 +111,7 @@ def main():
 
                 horizontal_flipped_image = functions.horizontal_flip(image)
 
+                image = horizontal_flipped_image
 
                 if horizontal_flipped_image is not None:
                     # Display the uploaded image
@@ -116,6 +124,7 @@ def main():
 
                 vertical_flipped_image = functions.vertical_flip(image)
 
+                image = vertical_flipped_image
 
                 if vertical_flipped_image is not None:
                     # Display the uploaded image
@@ -130,6 +139,7 @@ def main():
             
             contrast_image = functions.linearContrastStretch(image, contrast_input)
 
+            image = contrast_image
 
             if contrast_image is not None:
                     # Display the uploaded image
@@ -145,6 +155,7 @@ def main():
             
             bright_image = functions.image_brightness(image, brightness_input)
 
+            image = bright_image
 
             if bright_image is not None:
                     # Display the uploaded image
@@ -169,6 +180,7 @@ def main():
 
                 guassian_image = functions.guassian_blur(image, kernel_size)
 
+                image = guassian_image
 
                 if guassian_image is not None:
                     # Display the uploaded image
@@ -179,6 +191,7 @@ def main():
 
                 median_image = functions.median_blur(image, kernel_size)
 
+                image = median_image
 
                 if median_image is not None:
                     # Display the uploaded image
@@ -204,10 +217,11 @@ def main():
             
             power_image = intensity_transform_laws.power_law_transform(image, gamma)
 
+            image = power_image
 
             if power_image is not None:
                     # Display the uploaded image
-                    container.image(power_image, caption="Contrast Image", use_column_width=False)
+                    container.image(power_image, caption="Power Law Image", use_column_width=False)
         
         
         c = st.number_input("Enter the C value:", min_value=0.0, max_value=25.0, value=1.0, step=0.01)
@@ -218,10 +232,11 @@ def main():
             
             log_image = intensity_transform_laws.log_transform(image, c)
 
+            image = log_image
 
             if log_image is not None:
                     # Display the uploaded image
-                    container.image(log_image, caption="Contrast Image", use_column_width=False)
+                    container.image(log_image, caption="Log Law Image", use_column_width=False)
         
         
         if st.button("Negative of the image"):
@@ -229,10 +244,11 @@ def main():
             
             neg_image = intensity_transform_laws.negative_of_image(image)
 
+            image = neg_image
 
             if neg_image is not None:
                     # Display the uploaded image
-                    container.image(neg_image, caption="Contrast Image", use_column_width=False)
+                    container.image(neg_image, caption="Negative Image", use_column_width=False)
 
 
 
