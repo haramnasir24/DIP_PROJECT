@@ -3,7 +3,6 @@ import numpy as np
 from PIL import Image
 
 
-
 def resize_image(img, w, h):
 
     img = pil_to_opencv(img)
@@ -160,20 +159,51 @@ def image_brightness(img, bright):
     return b_image
 
 
+def color_space_transform(img_path, target_color_space):
+
+    img = pil_to_opencv(img_path)
+
+    # Ensure the image is in BGR format (OpenCV's default)
+    if len(img.shape) != 3 or img.shape[2] != 3:
+        raise ValueError("Input image should be in BGR format.")
+
+    # Convert the image to the target color space
+    if target_color_space == 'RGB':
+        transformed_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    elif target_color_space == 'HSV':
+        transformed_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    elif target_color_space == 'LAB':
+        transformed_img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+
+    else:
+        raise ValueError(
+            f"Unsupported target color space: {target_color_space}")
+
+    color_transformed_image = opencv_to_pil(transformed_img)
+    return color_transformed_image
+
+
+def convert_to_grayscale(img):
+    img = pil_to_opencv(img)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    gray_img = opencv_to_pil(gray)
+
+    return gray_img
+
 # transformations
 # image compression
-# segmentation
-# image filtering and enhancement
-# morphological operations
-# watermarking and steganography
-# color space transformations
-# grayscale conversion
 # filters like Gaussian blur, median filter, and canny edge detection.
-# histogram equalisation
 # feature detection
 # logarithmic and power law transforms
 # perspective tranformation
-
+# image crop
+# morphological operations
+# segmentation
+# image filtering and enhancement
+# watermarking and steganography
 
 
 # helper functions:
