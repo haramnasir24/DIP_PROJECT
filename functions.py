@@ -193,6 +193,29 @@ def convert_to_grayscale(img):
 
     return gray_img
 
+
+def gaussian_blur(img, n):
+
+    img = pil_to_opencv(img)
+
+    guassBlurred = cv2.GaussianBlur(img, (n, n), 0)
+
+    guassBlurred = opencv_to_pil(guassBlurred)
+
+    return guassBlurred
+
+
+def median_blur(img, n):
+
+    img = pil_to_opencv(img)
+
+    medianBlurred = cv2.medianBlur(img, n)  # Adjust the kernel size as needed
+
+    medianBlurred = opencv_to_pil(medianBlurred)
+
+    return medianBlurred
+
+
 # transformations
 # image compression
 # filters like Gaussian blur, median filter, and canny edge detection.
@@ -209,7 +232,6 @@ def convert_to_grayscale(img):
 # helper functions:
 
 def pil_to_opencv(img):
-
     np_img = np.array(img)
     cv_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
 

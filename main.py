@@ -7,6 +7,10 @@ import intensity_transform_laws
 import histogramEqualisation
 import quantisation
 import otsu
+import waterMark
+
+# Declare image variable outside the main function
+image = None
 
 
 def custom_title():
@@ -16,6 +20,7 @@ def custom_title():
 
 
 def main():
+    global image
     # st.title("PHOTO EDITOR/PREPROCESSOR")
     custom_title()
 
@@ -238,18 +243,18 @@ def main():
             if (kernel_size % 2 == 0):
                 st.warning("Please enter an odd value for kernel size")
 
-            guass = st.form_submit_button("Guassian Blur")
+            gauss = st.form_submit_button("Gaussian Blur")
             median = st.form_submit_button("Median Blur")
             # bilateral = st.form_submit_button("Bilateral Blur")
 
-        if (guass):
+        if (gauss):
 
-            guassian_image = functions.guassian_blur(image, kernel_size)
+            gaussian_image = functions.gaussian_blur(image, kernel_size)
 
-            if guassian_image is not None:
+            if gaussian_image is not None:
                 # Display the uploaded image
                 container.image(
-                    guassian_image, caption="Blurred Image", use_column_width=False)
+                    gaussian_image, caption="Blurred Image", use_column_width=False)
 
         if (median):
 
@@ -259,14 +264,6 @@ def main():
                 # Display the uploaded image
                 container.image(
                     median_image, caption="Blurred Image", use_column_width=False)
-
-        # if(bilateral):
-
-        #         bilate_image = functions.bilateral_blur(image)
-
-        #         if bilate_image is not None:
-        #             # Display the uploaded image
-        #             container.image(bilate_image, caption="Rotated Image", use_column_width=False)
 
         # intensity transformations
         st.text("Apply Intensity Transformations:")
@@ -310,6 +307,36 @@ def main():
                 # Display the uploaded image
                 container.image(
                     neg_image, caption="Negative of Image", use_column_width=False)
+
+        st.text("Watermarking:")
+        # Create a form for watermarking
+        with st.form("watermark_form"):
+            # Allow the user to choose a watermark image
+            watermark_image = st.file_uploader("Choose a watermark...", type=[
+                                               "jpg", "jpeg", "png", "tiff"])
+
+            # Allow the user to set transparency
+            transparency_input = st.slider(
+                "Choose transparency:", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+
+            # Add a submit button to the form
+            submitted = st.form_submit_button("Add watermark")
+
+        # Check if the form is submitted
+        if submitted and watermark_image is not None:
+            # Process the watermark and display the result
+            wt_image = Image.open(watermark_image)
+            watermarkedImg = waterMark.add_watermark(
+                image, wt_image, transparency=transparency_input)
+            st.text("HIIIIIIIIII")
+
+            if watermarkedImg is not None:
+                # Display the watermarked image
+                st.text("HIIIIIIIIII")
+
+                container.image(
+                    watermarkedImg, caption="Watermarked Image", use_column_width=False)
+                st.text("HIIIIIIIIII")
 
 
 if __name__ == "__main__":
