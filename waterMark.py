@@ -3,49 +3,54 @@ import numpy as np
 from functions import pil_to_opencv, opencv_to_pil
 
 
-def add_watermark(input_image, watermark_img, transparency=0.5):
+def add_watermark(img, watermark):
 
     # Read the input and watermark images
-    input_image = pil_to_opencv(input_image)
-    watermark_image = pil_to_opencv(watermark_img)
+    img = pil_to_opencv(img)
+    watermark = pil_to_opencv(watermark)
 
-    # Check if the watermark image has an alpha channel
-    if watermark_image.shape[2] == 4:
-        # Resize the watermark image to fit the input image
-        h, w, _ = input_image.shape
-        watermark_image = cv2.resize(watermark_image, (w, h))
+    # scaling both images
+    percent_of_scaling = 20
+    new_width = int(img.shape[1] * percent_of_scaling/100)
+    new_height = int(img.shape[0] * percent_of_scaling/100)
+    new_dim = (new_width, new_height)
+    resized_img = cv2.resize(img, new_dim, interpolation=cv2.INTER_AREA)
 
-        # Extract the alpha channel (transparency) of the watermark image
-        alpha_channel = watermark_image[:, :, 3] / 255.0 * transparency
+    wm_scale = 40
+    wm_width = int(watermark.shape[1] * wm_scale/100)
+    wm_height = int(watermark.shape[0] * wm_scale/100)
+    wm_dim = (wm_width, wm_height)
 
-        # Blend the images
-        for c in range(0, 3):
-            input_image[:, :, c] = (
-                1 - alpha_channel) * input_image[:, :, c] + alpha_channel * watermark_image[:, :, c]
+    # to create watermark
+    resized_wm = cv2.resize(watermark, wm_dim, interpolation=cv2.INTER_AREA)
 
-        # input_img = opencv_to_pil(input_image)
-        return input_image
+    h_img, w_img, _ = resized_img.shape
+    center_y = int(h_img/2)
+    center_x = int(w_img/2)
+    h_wm, w_wm, _ = resized_wm.shape
+    top_y = center_y - int(h_wm/2)
+    left_x = center_x - int(w_wm/2)
+    bottom_y = top_y + h_wm
+    right_x = left_x + w_wm
+
+    # Ensure the ROI and resized watermark have the same dimensions
+    roi = resized_img[top_y:bottom_y, left_x:right_x]
+    resized_wm = cv2.resize(resized_wm, (roi.shape[1], roi.shape[0]))
+
+    # Check if the watermark has an alpha channel (transparency)
+    if resized_wm.shape[2] == 4:
+        # Extract the alpha channel and merge it with the ROI
+        alpha_channel = resized_wm[:, :, 3] / 255.0
+        result = cv2.addWeighted(roi, 1, resized_wm[:, :, :3], 0.3, 0)
+        resized_img[top_y:bottom_y, left_x:right_x] = result
     else:
-        # If the watermark image does not have an alpha channel, create one
-        h, w, _ = input_image.shape
-        alpha_channel = np.ones((h, w), dtype=np.uint8) * \
-            255  # Fully opaque alpha channel
+        # Merge the ROI and resized watermark directly
+        result = cv2.addWeighted(roi, 1, resized_wm, 0.3, 0)
+        resized_img[top_y:bottom_y, left_x:right_x] = result
 
-        # Merge the watermark image with the alpha channel
-        watermark_image_with_alpha = cv2.merge(
-            [watermark_image, alpha_channel])
+    resized_img = cv2.resize(
+        resized_img, (img.shape[1], img.shape[0]))
 
-        # Resize the watermark image with alpha channel to fit the input image
-        watermark_image_with_alpha_resized = cv2.resize(
-            watermark_image_with_alpha, (w, h))
+    resized_img = opencv_to_pil(resized_img)
 
-        # Ensure that both images have the same depth
-        if input_image.dtype != watermark_image_with_alpha_resized.dtype:
-            watermark_image_with_alpha_resized = watermark_image_with_alpha_resized.astype(
-                input_image.dtype)
-
-        # Blend the images
-        input_image = cv2.addWeighted(
-            input_image, 1 - transparency, watermark_image_with_alpha_resized, transparency, 0)
-
-        return input_image
+    return resized_img
