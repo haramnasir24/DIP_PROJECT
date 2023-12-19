@@ -2,22 +2,22 @@ import numpy as np
 from PIL import Image
 
 
-def log_transform(img, c):
+# def log_transform(img, c):
 
-    img = np.array(img)
+#     img = np.array(img)
 
-    # Apply log transform. 
-    # c = 255/(np.log(1 + np.max(img))) 
+#     # Apply log transform. 
+#     # c = 255/(np.log(1 + np.max(img))) 
 
-    log_transformed_image = c * np.log(1 + img) 
+#     log_transformed_image = c * np.log(1 + img) 
 
-    # Specify the data type. 
-    log_transformed_image = np.array(log_transformed_image, dtype = np.uint8) 
+#     # Specify the data type. 
+#     log_transformed_image = np.array(log_transformed_image, dtype = np.uint8) 
 
 
-    log_transformed_image = Image.fromarray(log_transformed_image)
+#     log_transformed_image = Image.fromarray(log_transformed_image)
 
-    return log_transformed_image
+#     return log_transformed_image
 
 
 
