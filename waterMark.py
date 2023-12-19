@@ -1,56 +1,64 @@
 import cv2
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-from functions import pil_to_opencv, opencv_to_pil
 
 
-def add_watermark(img, watermark):
+def pil_to_opencv(image_pil):
+    return cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
 
-    # Read the input and watermark images
-    img = pil_to_opencv(img)
-    watermark = pil_to_opencv(watermark)
 
-    # scaling both images
-    percent_of_scaling = 20
-    new_width = int(img.shape[1] * percent_of_scaling/100)
-    new_height = int(img.shape[0] * percent_of_scaling/100)
-    new_dim = (new_width, new_height)
-    resized_img = cv2.resize(img, new_dim, interpolation=cv2.INTER_AREA)
+def opencv_to_pil(image_cv):
+    return Image.fromarray(cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB))
 
-    wm_scale = 40
-    wm_width = int(watermark.shape[1] * wm_scale/100)
-    wm_height = int(watermark.shape[0] * wm_scale/100)
-    wm_dim = (wm_width, wm_height)
 
-    # to create watermark
-    resized_wm = cv2.resize(watermark, wm_dim, interpolation=cv2.INTER_AREA)
+def add_watermark_text(img, text):
+    watermark_image = img.copy()
+    draw = ImageDraw.Draw(watermark_image)
 
-    h_img, w_img, _ = resized_img.shape
-    center_y = int(h_img/2)
-    center_x = int(w_img/2)
-    h_wm, w_wm, _ = resized_wm.shape
-    top_y = center_y - int(h_wm/2)
-    left_x = center_x - int(w_wm/2)
-    bottom_y = top_y + h_wm
-    right_x = left_x + w_wm
+    w, h = img.size
+    font_size = min(w, h) // 10  # Adjusted font size for clarity
 
-    # Ensure the ROI and resized watermark have the same dimensions
-    roi = resized_img[top_y:bottom_y, left_x:right_x]
-    resized_wm = cv2.resize(resized_wm, (roi.shape[1], roi.shape[0]))
+    font = ImageFont.truetype("fonts/ShortBaby-Mg2w.ttf", font_size)
 
-    # Check if the watermark has an alpha channel (transparency)
-    if resized_wm.shape[2] == 4:
-        # Extract the alpha channel and merge it with the ROI
-        alpha_channel = resized_wm[:, :, 3] / 255.0
-        result = cv2.addWeighted(roi, 1, resized_wm[:, :, :3], 0.3, 0)
-        resized_img[top_y:bottom_y, left_x:right_x] = result
-    else:
-        # Merge the ROI and resized watermark directly
-        result = cv2.addWeighted(roi, 1, resized_wm, 0.3, 0)
-        resized_img[top_y:bottom_y, left_x:right_x] = result
+    # Get the size of the text
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
 
-    resized_img = cv2.resize(
-        resized_img, (img.shape[1], img.shape[0]))
+    # Calculate the position for watermark
+    x = w - text_width - 10
+    y = h - text_height - 10
 
-    resized_img = opencv_to_pil(resized_img)
+    # Add the Watermark
+    draw.text((x, y), text, fill=(255, 255, 255), font=font, anchor='mm')
 
-    return resized_img
+    width = watermark_image.size[0]
+    height = watermark_image.size[1]
+
+    # return the watermarked image
+    return watermark_image, width, height
+
+
+def add_watermark_image(img, watermark):
+
+    width, height = img.size
+
+    # Resizing the watermark into desired size
+    size = (100, 100)
+    watermark.thumbnail(size)
+
+    # Set the watermark position, if 0, it will set into top left of image
+    x = 0
+    y = 0
+
+    # Set the watermark position, if written as below, it will set into bottom right of image
+    x = width - 100
+    y = height - 100
+
+    # Integrate the image watermark into the watermark position
+    img.paste(watermark, (x, y))
+
+    width = img.size[0]
+    height = img.size[1]
+
+    return img, width, height
