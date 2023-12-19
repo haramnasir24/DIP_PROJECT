@@ -21,7 +21,7 @@ def main():
     with st.sidebar:
 
         # Allow the user to upload an image
-        uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png", "tiff"])
+        uploaded_image = st.file_uploader("**Choose an image...**", type=["jpg", "jpeg", "png", "tiff"])
 
         # image = cv2.imread(uploaded_image)
 
@@ -47,10 +47,10 @@ def main():
 
         st.header("Functions:")
 
-        st.text("To Resize:")
+        st.markdown("**To Resize:**")
         with st.form("resize_form"):
-            width_input = st.number_input("Enter the desired width:", value=0, step=1)
-            height_input = st.number_input("Enter the desired height:", value=0, step=1)
+            width_input = st.number_input("Enter the desired width:", min_value=1, value=1, step=1)
+            height_input = st.number_input("Enter the desired height:", min_value=1, value=1, step=1)
 
             # Add a submit button to the form
             submitted = st.form_submit_button("Resize")
@@ -72,7 +72,7 @@ def main():
                 st.warning("Please enter both width and height before resizing.")
 
         
-        st.text("To Rotate:")
+        st.markdown("**To Rotate:**")
 
         with st.form("rotate_form"):
 
@@ -85,7 +85,6 @@ def main():
             if(uncropped_rotate):
 
                 uncropped_rotated_image = functions.rotate_not_cropped(image, angle)
-
 
                 image = uncropped_rotated_image
 
@@ -104,7 +103,7 @@ def main():
                     container.image(cropped_rotated_image, caption="Cropped Image", use_column_width=False)
 
 
-        st.text("Flip the image:")
+        st.markdown("**Flip the image:**")
         horizontal_flip = st.button("Horizontal Flip")
 
         if(horizontal_flip):
@@ -129,7 +128,23 @@ def main():
                 if vertical_flipped_image is not None:
                     # Display the uploaded image
                     container.image(vertical_flipped_image, caption="Flipped Image", use_column_width=False)
+                
+        
+        st.markdown("**Grayscale Conversion:**")
+        gray = st.button("Convert to grayscale")
 
+        if(gray):
+
+                gray_image = functions.rgb_to_grayscale(image)
+
+                # image = horizontal_flipped_image
+
+                if gray_image is not None:
+                    # Display the uploaded image
+                    container.image(gray_image, caption="Flipped Image", use_column_width=False)
+
+        
+        st.markdown("**Contrast & Brightness:**")
         # Add a slider
         contrast_input = st.slider("Change Contrast:", min_value=0, max_value=255, value=125, step=1, key='contrast_slider')
 
@@ -162,15 +177,13 @@ def main():
                     container.image(bright_image, caption="Bright Image", use_column_width=False)
 
 
-        st.text("Noise Removal Blurs:")
+        st.markdown("**Noise Removal Blurs:**")
 
         with st.form("blurs_form"):
 
-            kernel_size = st.number_input("Enter the desired size of kernel:", value=0, step=1)
+            kernel_size = st.number_input("Enter the desired size of kernel:",min_value=1, value=1, step=2)
             st.text("Can only be an ODD integer")
 
-            if(kernel_size % 2 == 0):
-                st.warning("Please enter an odd value for kernel size")
 
             guass = st.form_submit_button("Guassian Blur")
             median= st.form_submit_button("Median Blur")
@@ -206,8 +219,10 @@ def main():
         #         if bilate_image is not None:
         #             # Display the uploaded image
         #             container.image(bilate_image, caption="Rotated Image", use_column_width=False)
+                    
 
-        st.text("Apply Intensity Transformations:")
+        # st.markdown("**Apply Intensity Transformations:**")
+        st.markdown("**Apply Power Law:**")
         # Add a slider
         gamma = st.number_input("Enter the Gamma value:", min_value=0.0, max_value=100.0, value=1.0, step=0.01)
 
@@ -224,21 +239,21 @@ def main():
                     container.image(power_image, caption="Power Law Image", use_column_width=False)
         
         
-        c = st.number_input("Enter the C value:", min_value=0.0, max_value=25.0, value=1.0, step=0.01)
+        # c = st.number_input("Enter the C value:", min_value=0.0, max_value=25.0, value=1.0, step=0.01)
 
-        # Check if the slider value has changed
-        if st.button("Apply Log Law"):
+        # # Check if the slider value has changed
+        # if st.button("Apply Log Law"):
 
             
-            log_image = intensity_transform_laws.log_transform(image, c)
+        #     log_image = intensity_transform_laws.log_transform(image, c)
 
-            image = log_image
+        #     image = log_image
 
-            if log_image is not None:
-                    # Display the uploaded image
-                    container.image(log_image, caption="Log Law Image", use_column_width=False)
+        #     if log_image is not None:
+        #             # Display the uploaded image
+        #             container.image(log_image, caption="Log Law Image", use_column_width=False)
         
-        
+        st.markdown("**Convert to negative image:**")
         if st.button("Negative of the image"):
 
             
