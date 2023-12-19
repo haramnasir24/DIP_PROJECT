@@ -3,12 +3,48 @@ import numpy as np
 from PIL import Image
 
 
-def resize_image(img, w, h):
+
+def resize_image(img, new_width, new_height):
 
     img = pil_to_opencv(img)
 
-    # Resize the image
-    resized_image = cv2.resize(img, (w, h))
+    # Get the dimensions of the original image
+    height, width = img.shape[:2]
+
+    # Create an empty array for the resized image
+    resized_image = np.zeros((new_height, new_width, 3), dtype=np.uint8)
+
+    # Calculate scaling factors for height and width
+    scale_y = height / new_height
+    scale_x = width / new_width
+
+    # Iterate over each pixel in the resized image
+    for y in range(new_height):
+        for x in range(new_width):
+            # Calculate the corresponding position in the original image
+            original_y = y * scale_y
+            original_x = x * scale_x
+
+            # Find the four nearest pixels in the original image
+            y1 = int(original_y)
+            y2 = min(y1 + 1, height - 1)
+            x1 = int(original_x)
+            x2 = min(x1 + 1, width - 1)
+
+            # Bilinear interpolation
+            dy = original_y - y1
+            dx = original_x - x1
+
+            # Interpolate values for each channel
+            interpolated_pixel = (
+                (1 - dx) * (1 - dy) * img[y1, x1] +
+                dx * (1 - dy) * img[y1, x2] +
+                (1 - dx) * dy * img[y2, x1] +
+                dx * dy * img[y2, x2]
+            )
+
+            # Set the pixel value in the resized image
+            resized_image[y, x] = np.round(interpolated_pixel).astype(np.uint8)
 
     resized_image = opencv_to_pil(resized_image)
 
@@ -18,8 +54,6 @@ def resize_image(img, w, h):
 def rotate_cropped(img, angle):
 
     img = pil_to_opencv(img)
-
-    height, width, _ = img.shape
 
     # Get the image center
     center = tuple(np.array(img.shape[1::-1]) / 2)
@@ -65,13 +99,20 @@ def rotate_not_cropped(img, angle):
 
     return rotated_image
 
+
 def horizontal_flip(img):
 
     img = pil_to_opencv(img)
 
-    # Flip the image horizontally
-    horizontal_flipped_image = cv2.flip(img, 1)
+    # horizontal_flipped_image = cv2.flip(img, 1)
 
+    height, width = img.shape[:2]
+
+    horizontal_flipped_image = np.zeros_like(img)
+
+    for i in range(height):
+        for j in range(width):
+            horizontal_flipped_image[i, j] = img[i, width - 1 - j]
 
     horizontal_flipped_image = opencv_to_pil(horizontal_flipped_image)
 
@@ -82,7 +123,15 @@ def vertical_flip(img):
 
     img = pil_to_opencv(img)
 
-    vertical_flipped_image = cv2.flip(img, 0)
+    # vertical_flipped_image = cv2.flip(img, 0)
+
+    height, width = img.shape[:2]
+
+    vertical_flipped_image = np.zeros_like(img)
+
+    for i in range(height):
+        for j in range(width):
+            vertical_flipped_image[i, j] = img[height - 1 - i, j]
 
 
     vertical_flipped_image = opencv_to_pil(vertical_flipped_image)
@@ -100,7 +149,8 @@ def crop_image(img):
     # Crop the image
     cropped_image = img[y:y+h, x:x+w]
 
-    height, width, _ = img.shape
+    height, width = img.shape[:2]
+
     cropped_image = cv2.resize(cropped_image, (width, height))
 
     cropped_image = opencv_to_pil(cropped_image)
@@ -179,7 +229,28 @@ def median_blur(img, n):
     
     
 
+def rgb_to_grayscale(img):
 
+    img = pil_to_opencv(img)
+
+    # Ensure the image is in the correct format
+    if len(img.shape) != 3 or img.shape[2] != 3:
+        raise ValueError("Input must be a 3-channel BGR image")
+
+    # Extract the BGR channels
+    B = img[:,:,0]
+    G = img[:,:,1]
+    R = img[:,:,2]
+
+    # Calculate luminance
+    grayscale_image = 0.299 * R + 0.587 * G + 0.114 * B
+
+    # Convert to uint8 (8-bit) data type
+    grayscale_image = grayscale_image.astype(np.uint8)
+
+    grayscale_image = opencv_to_pil(grayscale_image)
+
+    return grayscale_image
 
 
 
