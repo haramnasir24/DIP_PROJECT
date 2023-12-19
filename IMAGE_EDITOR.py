@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+from io import BytesIO
 import numpy as np
 import cv2
 import functions
@@ -10,7 +11,10 @@ def custom_title():
         <h2 style='text-align: center; color: darkgreen; margin-top: 0px'>PHOTO EDITOR/PREPROCESSOR</h2>
     """, unsafe_allow_html=True)
 
-
+global image
+image = None
+global container
+container = None
 
 def main():
     # st.title("PHOTO EDITOR/PREPROCESSOR")
@@ -23,11 +27,11 @@ def main():
         # Allow the user to upload an image
         uploaded_image = st.file_uploader("**Choose an image...**", type=["jpg", "jpeg", "png", "tiff"])
 
-        # image = cv2.imread(uploaded_image)
 
     if uploaded_image is not None:
 
-        global image
+
+        
 
         # Display the uploaded image
         image = Image.open(uploaded_image)
@@ -265,6 +269,22 @@ def main():
                     # Display the uploaded image
                     container.image(neg_image, caption="Negative Image", use_column_width=False)
 
+
+# Add a download button for the currently displayed image
+    if container is not None:
+        # Use st.download_button to trigger the download
+        st.download_button(
+            label="Download Image",
+            data=image_to_bytes(image),
+            file_name="downloaded_image.png",
+            key="download_image",
+        )
+
+def image_to_bytes(img):
+    img_data = BytesIO()
+    img.save(img_data, format="PNG")
+    img_bytes = img_data.getvalue()
+    return img_bytes
 
 
 if __name__ == "__main__":
