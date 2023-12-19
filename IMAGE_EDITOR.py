@@ -141,7 +141,7 @@ def main():
 
                 gray_image = functions.rgb_to_grayscale(image)
 
-                # image = horizontal_flipped_image
+                image = gray_image
 
                 if gray_image is not None:
                     # Display the uploaded image
