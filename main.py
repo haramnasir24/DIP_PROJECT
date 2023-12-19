@@ -316,8 +316,8 @@ def main():
                                                "jpg", "jpeg", "png", "tiff"])
 
             # Allow the user to set transparency
-            transparency_input = st.slider(
-                "Choose transparency:", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+            # transparency_input = st.slider(
+            #     "Choose transparency:", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
 
             # Add a submit button to the form
             submitted = st.form_submit_button("Add watermark")
@@ -327,16 +327,17 @@ def main():
             # Process the watermark and display the result
             wt_image = Image.open(watermark_image)
             watermarkedImg = waterMark.add_watermark(
-                image, wt_image, transparency=transparency_input)
-            st.text("HIIIIIIIIII")
+                image, wt_image)
+            # st.text("HIIIIIIIIII")
 
             if watermarkedImg is not None:
                 # Display the watermarked image
-                st.text("HIIIIIIIIII")
+                # st.text("HIIIIIIIIII")
 
                 container.image(
                     watermarkedImg, caption="Watermarked Image", use_column_width=False)
-                st.text("HIIIIIIIIII")
+
+                # st.text("HIIIIIIIIII")
 
 
 if __name__ == "__main__":
