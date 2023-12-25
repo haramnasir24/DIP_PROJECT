@@ -44,7 +44,7 @@ def main():
         
     if st.session_state.image is not None:
         width, height = st.session_state.image.size
-        container = st.image(st.session_state.image, caption="Uploaded Image", use_column_width=(width > 800 or height > 500))
+        container = st.image(st.session_state.image, caption="Uploaded Image", use_column_width="auto")
         
         # Get image bytes and format
         with st.sidebar:
@@ -70,7 +70,7 @@ def main():
                 submitted = st.form_submit_button("Resize", use_container_width=True)
                 if submitted and width_input != 0 and height_input != 0 and st.session_state.image:
                     st.session_state.image = functions.resize_image(st.session_state.image, width_input, height_input)
-                    container.image(st.session_state.image, caption="Resized Image", use_column_width=False)
+                    container.image(st.session_state.image, caption="Resized Image", use_column_width="auto")
 
                 elif submitted:
                     st.warning("Please enter both width and height before resizing.")
@@ -82,23 +82,23 @@ def main():
                 cropped_rotate = st.form_submit_button("Rotate and Crop", use_container_width=True)
                 if uncropped_rotate and st.session_state.image is not None:
                     st.session_state.image = functions.rotate_not_cropped(st.session_state.image, angle)
-                    container.image(st.session_state.image, caption="Cropped Image", use_column_width=False)
+                    container.image(st.session_state.image, caption="Cropped Image", use_column_width="auto")
 
                 if cropped_rotate and st.session_state.image is not None:
                     st.session_state.image = functions.rotate_cropped(st.session_state.image, angle)
-                    container.image(st.session_state.image, caption="Cropped Image", use_column_width=False)
+                    container.image(st.session_state.image, caption="Cropped Image", use_column_width="auto")
 
         # Flip the image
         with st.expander("Flips"):
             horizontal_flip = st.button("Horizontal Flip", use_container_width=True)
             if horizontal_flip:
                 st.session_state.image = functions.horizontal_flip(st.session_state.image)
-                container.image(st.session_state.image, caption="Flipped Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Flipped Image", use_column_width="auto")
 
             vertical_flip = st.button("Vertical Flip",  use_container_width=True)
             if vertical_flip:
                 st.session_state.image = functions.vertical_flip(st.session_state.image)
-                container.image(st.session_state.image, caption="Flipped Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Flipped Image", use_column_width="auto")
 
 
         # Contrast and Brightness Adjustments
@@ -106,37 +106,37 @@ def main():
             contrast_input = st.slider("Change Contrast:", min_value=0, max_value=255, value=125, step=1, key='contrast_slider')
             if st.button("Apply Contrast", use_container_width=True):
                 st.session_state.image = functions.linearContrastStretch(st.session_state.image, contrast_input)
-                container.image(st.session_state.image, caption="Contrast Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Contrast Image", use_column_width="auto")
 
             brightness_input = st.slider("Change Brightness:", min_value=-255, max_value=255, value=0, step=1, key='brightness_slider')
             if st.button("Apply Brightness", use_container_width=True):
                 st.session_state.image = functions.image_brightness(st.session_state.image, brightness_input)
-                container.image(st.session_state.image, caption="Bright Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Bright Image", use_column_width="auto")
 
 
         # Grayscale Conversion
         if st.button("Greyscale", use_container_width=True):
             st.session_state.image = functions.convert_to_grayscale(st.session_state.image)
-            container.image(st.session_state.image, caption="Gray Image", use_column_width=False)
+            container.image(st.session_state.image, caption="Gray Image", use_column_width=True)
 
 
         # Otsu Thresholding
         if st.button("Otsu Threshold", use_container_width=True):
             st.session_state.image = otsu.apply_otsu_thresholding(st.session_state.image)
-            container.image(st.session_state.image, caption="Thresholded Image", use_column_width=False)
+            container.image(st.session_state.image, caption="Thresholded Image", use_column_width="auto")
 
         with st.expander("Quantisation"):
             # Quantisation
             quantisation_input = st.slider("Quantise the image:", min_value=2, max_value=256, value=16, step=1, key='quantisation_slider')
             if st.button("Apply Quantisation"):
                 st.session_state.image = quantisation.quantize_image(st.session_state.image, quantisation_input)
-                container.image(st.session_state.image, caption="Quantised Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Quantised Image", use_column_width="auto")
 
 
         # Histogram Equalisation
         if st.button("Apply Histogram Equalisation", use_container_width=True):
             st.session_state.image = histogram_equalisation.histogram_equalization(st.session_state.image)
-            container.image(st.session_state.image, caption="Equalised Image", use_column_width=False)
+            container.image(st.session_state.image, caption="Equalised Image", use_column_width="auto")
 
         # Noise Removal Blurs
         with st.expander("Blurs"):
@@ -151,11 +151,11 @@ def main():
 
             if gauss:
                 st.session_state.image = functions.gaussian_blur(st.session_state.image, kernel_size)
-                container.image(st.session_state.image, caption="Blurred Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Blurred Image", use_column_width="auto")
 
             if median:
                 st.session_state.image = functions.median_blur(st.session_state.image, kernel_size)
-                container.image(st.session_state.image, caption="Blurred Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Blurred Image", use_column_width="auto")
 
         # Intensity Transformations
         with st.expander("Intensity Transforms"):
@@ -163,18 +163,18 @@ def main():
             gamma = st.number_input("Enter the Gamma value:", min_value=0.0, max_value=100.0, value=1.0, step=0.01)
             if st.button("Apply Power Law", use_container_width=True):
                 st.session_state.image = intensity_transforms.power_law_transform(st.session_state.image, gamma)
-                container.image(st.session_state.image, caption="Power Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Power Image", use_column_width="auto")
 
             st.text("Log law:")
             c = st.number_input("Enter the C value:", min_value=0.0, max_value=25.0, value=0.0, step=0.01)
             if st.button("Apply Log Law", use_container_width=True):
                 st.session_state.image = intensity_transforms.log_transform(st.session_state.image, c)
-                container.image(st.session_state.image, caption="log Image", use_column_width=False)
+                container.image(st.session_state.image, caption="log Image", use_column_width="auto")
 
             st.text("Negative of image:")
             if st.button("Take negative of the image", use_container_width=True):
                 st.session_state.image = intensity_transforms.negative_of_image(st.session_state.image)
-                container.image(st.session_state.image, caption="Negative of Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Negative of Image", use_column_width="auto")
 
         # Watermarking
         with st.expander("Watermark"):
@@ -185,7 +185,7 @@ def main():
             if submitted and watermark_image is not None:
                 wt_image = Image.open(watermark_image)
                 st.session_state.image = watermark.add_watermark(st.session_state.image, wt_image)
-                container.image(st.session_state.image, caption="Watermarked Image", use_column_width=False)
+                container.image(st.session_state.image, caption="Watermarked Image", use_column_width="auto")
                 
         
 
