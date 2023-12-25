@@ -1,3 +1,4 @@
+import base64
 import cv2
 import numpy as np
 from PIL import Image
@@ -91,3 +92,15 @@ def gaussian_blur(img, n):
 
 def median_blur(img, n):
     return process_image(img, lambda cv_img: cv2.medianBlur(cv_img, n))
+
+import io
+
+def get_image_bytes(img):
+    """Converts a PIL image to bytes while preserving its original format"""
+    buffered = io.BytesIO()
+
+    # Determine the image format or default to PNG
+    format = img.format if img.format else "PNG"
+
+    img.save(buffered, format=format)
+    return buffered.getvalue(), format.lower()

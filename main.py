@@ -15,13 +15,14 @@ image = None
 
 def custom_navbar(logo_path):
     st.markdown(f"""
-        <nav style="background-color: #333; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <img src="data:image/png;base64,{logo_path}" alt="Logo" style="height:75px; margin-left: 40px">
-            </div>
-            <h2 style='color: white; margin: 0'>Phomo App EE433 Project</h2>
-        </nav>
+    <nav style="background-color: #333; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div style="transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#444'" onmouseout="this.style.backgroundColor='#333'">
+            <img src="data:image/png;base64,{logo_path}" alt="Logo" style="height:75px; margin-left: 40px; border-radius: 10px;">
+        </div>
+        <h2 style='color: white; margin: 0; text-shadow: 2px 2px 4px #000000;'>Phomo App Project</h2>
+    </nav>
     """, unsafe_allow_html=True)
+
 
 
 def main():
@@ -36,7 +37,7 @@ def main():
     custom_navbar(logo)
 
     with st.sidebar:
-        uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png", "tiff"])
+        uploaded_image = st.file_uploader("Upload Image",label_visibility="collapsed", type=["jpg", "jpeg", "png", "tiff"])
 
     if uploaded_image is not None:
         st.session_state.image = Image.open(uploaded_image)
@@ -44,6 +45,20 @@ def main():
     if st.session_state.image is not None:
         width, height = st.session_state.image.size
         container = st.image(st.session_state.image, caption="Uploaded Image", use_column_width=(width > 800 or height > 500))
+        
+        # Get image bytes and format
+        with st.sidebar:
+            img_bytes, img_format = functions.get_image_bytes(st.session_state.image)
+            mime_type = f"image/{img_format}"
+
+        # Add a download button
+            st.download_button(
+            label="Download Image",
+            data=img_bytes,
+            file_name=f"processed_image.{img_format}",
+            mime=mime_type,
+            use_container_width=True
+        )
 
 
     with st.sidebar:
@@ -171,6 +186,8 @@ def main():
                 wt_image = Image.open(watermark_image)
                 st.session_state.image = watermark.add_watermark(st.session_state.image, wt_image)
                 container.image(st.session_state.image, caption="Watermarked Image", use_column_width=False)
+                
+        
 
 if __name__ == "__main__":
     main()
